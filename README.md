@@ -123,41 +123,37 @@ The script uses SMTP to send email notifications. For Gmail:
 | `SMTP_USER` | - | SMTP username |
 | `SMTP_PASS` | - | SMTP password/app password |
 
-## Monitored Sources
+## Supported Sources
+
+EventAlert can monitor:
 
 ### Websites
-- **Making Time Official**: https://makingtimeisrad.com
-- **Making Time Tickets**: https://makingtimeisrad.com/tickets
-- **Resident Advisor**: https://ra.co/events/2159561 (2025 event)
+- Official event websites
+- Ticketing platforms
+- Music news sites (Resident Advisor, etc.)
+- Any webpage with detectable content changes
 
-### Instagram
-- **@makingtimeisrad**: Main festival account
-- **@davep_makingtime**: Dave P's personal account
+### Social Media
+- Instagram accounts (with rate limiting)
+- Any platform that provides RSS/API access
 
-## Trigger Phrases
-
-The script looks for these patterns (case-insensitive):
-- "single day tickets"
-- "single day passes"
-- "day pass on sale"
-- "day pass available"
-- "one day tickets"
-- "one day passes"
-- "saturday only/pass/ticket"
-- "sunday only/pass/ticket"
+### Detection Methods
+- Text pattern matching with regex support
+- Content change detection
+- Configurable trigger phrases per session
 
 ## Running in Background
 
 ### macOS/Linux
 ```bash
 # Run in background
-nohup python ticket_notifier.py > notifier.log 2>&1 &
+nohup ./ticketnotifier/bin/python event_alert.py --session your_session > logs/your_session_output.log 2>&1 &
 
 # Check if running
-ps aux | grep ticket_notifier
+ps aux | grep event_alert
 
 # Stop
-pkill -f ticket_notifier.py
+pkill -f "event_alert.py --session your_session"
 ```
 
 ### Using Screen
@@ -166,7 +162,7 @@ pkill -f ticket_notifier.py
 screen -S ticket-monitor
 
 # Run the script
-python ticket_notifier.py
+./ticketnotifier/bin/python event_alert.py --session your_session
 
 # Detach: Ctrl+A, then D
 # Reattach: screen -r ticket-monitor
@@ -174,9 +170,9 @@ python ticket_notifier.py
 
 ## Files Created
 
-- `mt_watcher_state.json`: Persistent state (last checked posts, etc.)
-- `mt_watcher.log`: Application logs
-- `notifier.log`: Output when running in background
+- `state_[session_name].json`: Persistent state (last checked posts, etc.)
+- `logs/[session_name].log`: Application logs per session
+- `logs/[session_name]_output.log`: Output when running in background
 
 ## Troubleshooting
 
@@ -200,10 +196,10 @@ python ticket_notifier.py
 ### Viewing Logs
 ```bash
 # Follow live logs for a specific session
-tail -f logs/making_time.log
+tail -f logs/your_session.log
 
 # View recent activity
-tail -50 logs/making_time.log
+tail -50 logs/your_session.log
 
 # View all session logs
 ls logs/
@@ -213,17 +209,17 @@ ls logs/
 
 1. **Edit session configuration**:
    ```bash
-   nano sessions/making_time.json
+   nano sessions/your_session.json
    ```
 
 2. **Update URLs for future years**:
    - Edit the session JSON file
-   - Update Resident Advisor event IDs
-   - Modify Instagram accounts as needed
+   - Update event-specific URLs and IDs
+   - Modify social media accounts as needed
 
 3. **Test configuration**:
    ```bash
-   ./ticketnotifier/bin/python event_alert.py --session making_time
+   ./ticketnotifier/bin/python event_alert.py --session your_session
    ```
 
 ## Development
